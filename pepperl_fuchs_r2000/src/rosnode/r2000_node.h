@@ -32,6 +32,7 @@
 
 #include <ros/ros.h>
 #include <std_msgs/String.h>
+#include <ros/console.h>
 
 namespace pepperl_fuchs {
 class R2000Driver;

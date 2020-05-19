@@ -68,15 +68,17 @@ bool R2000Node::connect()
     // Connecting to laser range finder
     //-------------------------------------------------------------------------
     driver_ = new R2000Driver();
-    std::cout << "Connecting to scanner at " << scanner_ip_ << " ... ";
-    if( driver_->connect(scanner_ip_,80) )
-        std::cout << "OK" << std::endl;
-    else
-    {
-        std::cout << "FAILED!" << std::endl;
-        std::cerr << "Connection to scanner at " << scanner_ip_ << " failed!" << std::endl;
-        return false;
-    }
+    ROS_INFO_STREAM("Connecting to scanner at " << scanner_ip_ << " ... ");
+
+    while (!driver_->connect(scanner_ip_,80)){
+      ROS_INFO_STREAM("FAILED!");
+      ROS_INFO_STREAM("Connection to scanner at " << scanner_ip_ << " failed!");
+      ROS_INFO_STREAM("Waiting 30 seconds before reconnecting");
+      ros::Duration(30, 0).sleep();
+      ROS_INFO_STREAM("Reonnecting to scanner at " << scanner_ip_ << " ... ");
+      }
+
+    ROS_INFO_STREAM("OK");
 
     // Setting, reading and displaying parameters
     //-------------------------------------------------------------------------
@@ -93,7 +95,7 @@ bool R2000Node::connect()
     //-------------------------------------------------------------------------
     std::cout << "Starting capturing: ";
     if( driver_->startCapturingTCP() )
-        std::cout << "OK" << std::endl;
+        ROS_INFO_STREAM("OK");
     else
     {
         std::cout << "FAILED!" << std::endl;
