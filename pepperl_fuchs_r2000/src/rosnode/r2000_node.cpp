@@ -71,10 +71,9 @@ bool R2000Node::connect()
     ROS_INFO_STREAM("Connecting to scanner at " << scanner_ip_ << " ... ");
 
     while (!driver_->connect(scanner_ip_,80)){
-      ROS_INFO_STREAM("FAILED!");
-      ROS_INFO_STREAM("Connection to scanner at " << scanner_ip_ << " failed!");
-      ROS_INFO_STREAM("Waiting 30 seconds before reconnecting");
-      ros::Duration(30, 0).sleep();
+      ROS_WARN_STREAM("Connection to scanner at " << scanner_ip_ << " failed!");
+      ROS_INFO_STREAM("Trying again in 5 minutes...");
+      ros::Duration(300, 0).sleep();
       ROS_INFO_STREAM("Reonnecting to scanner at " << scanner_ip_ << " ... ");
       }
 
@@ -109,11 +108,11 @@ void R2000Node::getScanData(const ros::TimerEvent &e)
 {
     if( !driver_->isCapturing() )
     {
-        std::cout << "ERROR: Laser range finder disconnected. Trying to reconnect..." << std::endl;
+        ROS_WARN_STREAM("Laser range finder disconnected. Trying to reconnect...");
         while( !connect() )
         {
-            std::cout << "ERROR: Reconnect failed. Trying again in 2 seconds..." << std::endl;
-            usleep((2*1000000));
+            ROS_WARN_STREAM("Reconnect failed. Trying again in 5 minutes...");
+            ros::Duration(300,0).sleep();
         }
     }
     auto scandata = driver_->getFullScan();
