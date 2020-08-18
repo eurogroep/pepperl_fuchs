@@ -12,6 +12,7 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++0x -Wfatal-errors")
 
 find_package(catkin REQUIRED COMPONENTS
+  dynamic_reconfigure
   roscpp
   std_msgs
   sensor_msgs
@@ -20,6 +21,9 @@ find_package(Boost REQUIRED COMPONENTS
   thread
 )
 
+generate_dynamic_reconfigure_options(
+  cfg/PepperlFuchsR2000.cfg
+)
 catkin_package(
   INCLUDE_DIRS include ${Boost_INCLUDE_DIRS}
   LIBRARIES r2000_driver
