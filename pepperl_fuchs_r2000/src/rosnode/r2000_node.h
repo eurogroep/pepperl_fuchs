@@ -33,6 +33,8 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
 #include <ros/console.h>
+#include <dynamic_reconfigure/server.h>
+#include <pepperl_fuchs_r2000/PepperlFuchsR2000Config.h>
 
 namespace pepperl_fuchs {
 class R2000Driver;
@@ -80,8 +82,16 @@ private:
     //! samples_per_scan parameter
     int samples_per_scan_;
 
+    //! time offset on the scan timestamp
+    double time_offset_;
+
     //! Pointer to driver
     R2000Driver* driver_;
+
+    void reconfigureCallback(pepperl_fuchs_r2000::PepperlFuchsR2000Config& config, uint32_t level);
+
+    typedef dynamic_reconfigure::Server<pepperl_fuchs_r2000::PepperlFuchsR2000Config> ReconfigureServer;
+    std::shared_ptr<ReconfigureServer> reconfigure_server_;
 };
 }
 

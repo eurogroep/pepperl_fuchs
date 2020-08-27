@@ -43,6 +43,7 @@ R2000Node::R2000Node():nh_("~")
     nh_.param("scanner_ip",scanner_ip_,std::string(""));
     nh_.param("scan_frequency",scan_frequency_,35);
     nh_.param("samples_per_scan",samples_per_scan_,3600);
+    nh_.param("time_offset", time_offset_,0.0);
 
     if( scanner_ip_ == "" )
     {
@@ -58,6 +59,8 @@ R2000Node::R2000Node():nh_("~")
     scan_publisher_ = nh_.advertise<sensor_msgs::LaserScan>("scan",100);
     cmd_subscriber_ = nh_.subscribe("control_command",100,&R2000Node::cmdMsgCallback,this);
     get_scan_data_timer_ = nh_.createTimer(ros::Duration(1/(2*std::atof(driver_->getParametersCached().at("scan_frequency").c_str()))), &R2000Node::getScanData, this);
+    reconfigure_server_ = std::shared_ptr<ReconfigureServer>(new ReconfigureServer(nh_));
+    reconfigure_server_->setCallback(boost::bind(&R2000Node::reconfigureCallback, this, _1, _2));
 }
 
 //-----------------------------------------------------------------------------
@@ -121,7 +124,7 @@ void R2000Node::getScanData(const ros::TimerEvent &e)
 
     sensor_msgs::LaserScan scanmsg;
     scanmsg.header.frame_id = frame_id_;
-    scanmsg.header.stamp = ros::Time::now();
+    scanmsg.header.stamp = ros::Time::now() + ros::Duration(time_offset_);
 
     scanmsg.angle_min = -M_PI;
     scanmsg.angle_max = +M_PI;
@@ -140,6 +143,11 @@ void R2000Node::getScanData(const ros::TimerEvent &e)
         scanmsg.intensities[i] = scandata.amplitude_data[i];
     }
     scan_publisher_.publish(scanmsg);
+}
+
+void R2000Node::reconfigureCallback(pepperl_fuchs_r2000::PepperlFuchsR2000Config &config, uint32_t level)
+{
+  time_offset_ = config.time_offset;
 }
 
 //-----------------------------------------------------------------------------
